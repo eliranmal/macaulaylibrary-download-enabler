@@ -5,7 +5,7 @@
   "permissions": [
     "contextMenus",
     "downloads",
-    "http://macaulaylibrary.org"
+    "http://macaulaylibrary.org/"
   ],
   "background": {
     "scripts": [
