@@ -1,7 +1,7 @@
 {
     "name": "macaulaylibrary download enabler",
     "description": "enables to download audio files from the macaulaylibrary website.",
-    "version": "0.1",
+    "version": "0.1.0",
     "permissions": [
         "contextMenus",
         "downloads",
