@@ -1,7 +1,7 @@
 {
     "name": "sample downloader",
     "description": "easy downloader for audio samples",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "permissions": [
         "tabs",
         "downloads",
