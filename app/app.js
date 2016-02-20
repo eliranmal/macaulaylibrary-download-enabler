@@ -1,118 +1,129 @@
-var regex = {
-    audioCatalogNumberExtractor: /\/(\d+)/
+var App = function() {
+    this.regex = {
+        audioCatalogNumberExtractor: /\/(\d+)/
+    };
 };
 
-var exists = function(val) {
-    return val || +val === 0;
-}
+App.prototype = {
 
-var log = function() {
-    console && console.log && console.log.apply(console, arguments);
+    exists: function(val) {
+        return val || +val === 0;
+    },
+
+    log: function() {
+        console && console.log && console.log.apply(console, arguments);
+    },
+
+    err: function() {
+        console && console.error && console.error.apply(console, arguments);
+    },
+
+    getResourceUrl = function(path) {
+        return chrome.extension.getURL(path);
+    },
+
+    getImageUrl = function(file) {
+        return getResourceUrl('images/' + file + '.png');
+    },
+
+    logExists: function(val, name) {
+        if (this.exists(val)) {
+            this.log(name + '', val);
+        } else {
+            this.err('no ' + name + '!');
+        }
+    },
+
+    getSampleUrl: function(audioCatalogNumber) {
+        var sampleUrl;
+        audioCatalogNumber = audioCatalogNumber || 0;
+        if (this.exists(audioCatalogNumber) &&
+            (typeof audioCatalogNumber === 'number' || typeof audioCatalogNumber ===
+                'string')) {
+            sampleUrl = 'http://media2.macaulaylibrary.org/Audio/Audio1/' +
+                Math.floor(audioCatalogNumber / 10000) +
+                '/' +
+                audioCatalogNumber +
+                '.mp3';
+        }
+        this.logExists(sampleUrl, 'sample URL');
+        return sampleUrl;
+    },
+
+    getAudioCatalogNumber: function(linkUrl) {
+        var audioCatalogNumber, regexMatch;
+        linkUrl = linkUrl || '';
+        regexMatch = linkUrl.match(this.regex.audioCatalogNumberExtractor);
+        if (regexMatch && regexMatch.length) {
+            audioCatalogNumber = regexMatch[1];
+        }
+        this.logExists(audioCatalogNumber, 'audio catalog number');
+        return audioCatalogNumber;
+    },
+
+    sanitizeUrl: function(rawUrl) {
+        var url;
+        try {
+            url = new URL(rawUrl);
+        } finally {
+            this.logExists(url);
+            return url;
+        }
+    },
+
+    getUrlHref: function(url) {
+        var urlHref;
+        url = url || {};
+        urlHref = url.href;
+        this.logExists(urlHref, 'URL h-ref');
+        return urlHref;
+    },
+
+    download: function(urlHref) {
+        if (urlHref) {
+            chrome.runtime.sendMessage({
+                title: 'ml-samples-downloader:download',
+                url: urlHref
+            });
+        }
+    },
+
+    getContextMenuLinkUrl: function(info) {
+        var linkUrl;
+        info = info || {};
+        linkUrl = info.linkUrl;
+        this.logExists(linkUrl, 'link url');
+        return linkUrl;
+    },
+
+    getDomLinkUrl: function(node) {
+        var linkUrl;
+        node = node || {};
+        linkUrl = node.getAttribute('href');
+        this.logExists(linkUrl, 'link url');
+        return linkUrl;
+    },
+
+    downloadSample: function(linkUrl) {
+        var audioCatalogNumber, rawUrl, sampleUrl, href;
+        audioCatalogNumber = this.getAudioCatalogNumber(linkUrl);
+        rawUrl = this.getSampleUrl(audioCatalogNumber);
+        sampleUrl = this.sanitizeUrl(rawUrl);
+        href = this.getUrlHref(sampleUrl);
+        this.download(href);
+    },
+
+    contextMenuLinkListener: function(info, tab) {
+        var linkUrl = this.getContextMenuLinkUrl(info);
+        this.downloadSample(linkUrl);
+    },
+
+    domLinkListener: function(node) {
+        var linkUrl = this.getDomLinkUrl(node);
+        this.downloadSample(linkUrl);
+    }
+
 };
 
-var err = function() {
-    console && console.error && console.error.apply(console, arguments);
-}
 
-var logExists = function(val, name) {
-    if (exists(val)) {
-        log(name + '', val);
-    } else {
-        err('no ' + name + '!');
-    }
-}
-
-var getSampleUrl = function(audioCatalogNumber) {
-    var sampleUrl;
-    audioCatalogNumber = audioCatalogNumber || 0;
-    if (exists(audioCatalogNumber) && typeof audioCatalogNumber === 'number') {
-        sampleUrl = 'http://media2.macaulaylibrary.org/Audio/Audio1/' +
-            Math.floor(audioCatalogNumber / 10000) +
-            '/' +
-            audioCatalogNumber +
-            '.mp3';
-    }
-    logExists(sampleUrl, 'sample URL');
-    return sampleUrl;
-}
-
-var getAudioCatalogNumber = function(linkUrl) {
-    var audioCatalogNumber;
-    linkUrl = linkUrl || '';
-    audioCatalogNumber = linkUrl.match(regex.audioCatalogNumberExtractor)[1];
-    logExists(audioCatalogNumber, 'audio catalog number');
-    return audioCatalogNumber;
-}
-
-var getLinkUrl = function(info) {
-    var linkUrl;
-    info = info || {};
-    linkUrl = info.linkUrl;
-    logExists(linkUrl, 'link url');
-    return linkUrl;
-}
-
-var sanitizeUrl = function(rawUrl) {
-    var url;
-    try {
-        url = new URL(rawUrl);
-    } finally {
-        logExists(url);
-        return url;
-    }
-}
-
-var getUrlHref = function(url) {
-    var urlHref;
-    url = url || {};
-    urlHref = url.href;
-    logExists(urlHref, 'URL h-ref');
-    return urlHref;
-}
-
-var download = function(urlHref) {
-    if (urlHref) {
-        chrome.downloads.download({
-            url: urlHref
-        }, function(id) {
-            log('download called', id);
-        });
-    }
-}
-
-var onLinkClick = function(info, tab) {
-    var linkUrl, audioCatalogNumber, rawUrl, url, href;
-    linkUrl = getLinkUrl(info);
-    audioCatalogNumber = getAudioCatalogNumber(linkUrl);
-    rawUrl = getSampleUrl(audioCatalogNumber);
-    url = sanitizeUrl(rawUrl);
-    href = getUrlHref(url);
-    download(href);
-}
-
-chrome.contextMenus.create({
-    title: 'get me this sample, yo',
-    contexts: ['link'],
-    onclick: onLinkClick
-});
-
-
-
-// just for fun - the onLinkClick function can also be written like this
-/*
-var onLinkClick = function(info, tab) {
-    download(
-        getUrlHref(
-            sanitizeUrl(
-                getSampleUrl(
-                    getAudioCatalogNumber(
-                        getLinkUrl(
-                            info
-                        )
-                    )
-                )
-            )
-        )
-    );
-}
-*/
+this.app = new App();

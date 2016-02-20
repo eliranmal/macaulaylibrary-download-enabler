@@ -1,16 +1,29 @@
 {
-    "name": "macaulaylibrary download enabler",
-    "description": "enables to download audio files from the macaulaylibrary website.",
+    "name": "sample downloader",
+    "description": "easy downloader for audio samples",
     "version": "0.1.0",
     "permissions": [
-        "contextMenus",
+        "tabs",
         "downloads",
+        "contextMenus",
         "http://macaulaylibrary.org/"
     ],
     "background": {
         "scripts": [
-            "app.js"
+            "app.js",
+            "background.js"
         ]
     },
+    "content_scripts": [{
+        "matches": [
+            "http://macaulaylibrary.org/*"
+        ],
+        "js": [
+            "lib/jquery/jquery-2.2.0.min.js",
+            "app.js",
+            "macaulay-library.js"
+        ],
+        "run_at": "document_end"
+    }],
     "manifest_version": 2
 }
