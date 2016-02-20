@@ -1,5 +1,6 @@
 var createDownloadElement = function(anchorElement) {
     return $('<div>')
+        .attr('title', 'get me this sample!')
         .css({
             position: 'absolute',
             left: '-20px',
