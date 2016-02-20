@@ -1,8 +1,8 @@
-chrome.contextMenus.create({
-    title: 'get me this sample, yo',
-    contexts: ['link'],
-    onclick: app.contextMenuLinkListener
-});
+// chrome.contextMenus.create({
+//     title: 'get me this sample, yo',
+//     contexts: ['link'],
+//     onclick: app.contextMenuLinkListener
+// });
 
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     app.log('background page got message', message);

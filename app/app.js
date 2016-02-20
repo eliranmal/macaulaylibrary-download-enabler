@@ -1,10 +1,11 @@
 var App = function() {
-    this.regex = {
-        audioCatalogNumberExtractor: /\/(\d+)/
-    };
 };
 
 App.prototype = {
+
+    regex: {
+        audioCatalogNumberExtractor: /\/(\d+)/
+    },
 
     exists: function(val) {
         return val || +val === 0;
@@ -18,12 +19,12 @@ App.prototype = {
         console && console.error && console.error.apply(console, arguments);
     },
 
-    getResourceUrl = function(path) {
+    getResourceUrl: function(path) {
         return chrome.extension.getURL(path);
     },
 
-    getImageUrl = function(file) {
-        return getResourceUrl('images/' + file + '.png');
+    getImageUrl: function(file) {
+        return this.getResourceUrl('images/' + file + '.png');
     },
 
     logExists: function(val, name) {

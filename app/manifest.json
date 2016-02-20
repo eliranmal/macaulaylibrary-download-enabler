@@ -8,6 +8,9 @@
         "contextMenus",
         "http://macaulaylibrary.org/"
     ],
+    "web_accessible_resources": [
+        "images/*"
+    ],
     "background": {
         "scripts": [
             "app.js",
